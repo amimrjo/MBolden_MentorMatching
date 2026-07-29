@@ -1,0 +1,11 @@
+# DB and generated data
+*.db
+__pycache__/
+*.pyc
+
+# Env / editor
+.venv/
+venv/
+.env
+.vscode/
+.idea/

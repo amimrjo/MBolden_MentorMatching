@@ -1,0 +1,110 @@
+[
+  {
+    "name": "Sara Kim",
+    "title": "Staff engineer, platform infra",
+    "department": "Engineering",
+    "seniority": "staff+",
+    "role_pool": "mentor",
+    "mentor_capacity": 4,
+    "resume_text": "Staff engineer with 9 years in distributed systems and platform infrastructure. Leads reliability initiatives across the org. Has mentored 6 junior and mid-level engineers on system design and career growth over the past 3 years."
+  },
+  {
+    "name": "David Moreno",
+    "title": "Senior product manager",
+    "department": "Product",
+    "seniority": "senior",
+    "role_pool": "both",
+    "mentor_capacity": 3,
+    "resume_text": "Senior product manager focused on product strategy and roadmap planning. Open to mentoring junior PMs on stakeholder management, and separately looking for a mentor in executive communication and organizational leadership."
+  },
+  {
+    "name": "Rina Patel",
+    "title": "Design lead",
+    "department": "Design",
+    "seniority": "senior",
+    "role_pool": "mentor",
+    "mentor_capacity": 5,
+    "resume_text": "Design lead with a background in leadership growth coaching, design systems, and cross-functional collaboration. Regularly runs performance reviews and career development conversations for the design team."
+  },
+  {
+    "name": "Jordan Lee",
+    "title": "Software engineer II",
+    "department": "Engineering",
+    "seniority": "mid",
+    "role_pool": "mentee",
+    "mentor_capacity": 0,
+    "resume_text": "Software engineer with 3 years of experience building backend services. Interested in distributed systems, platform reliability, and growing into a senior engineering role. Looking for a mentor in system design."
+  },
+  {
+    "name": "Priya Nair",
+    "title": "Associate product manager",
+    "department": "Product",
+    "seniority": "junior",
+    "role_pool": "mentee",
+    "mentor_capacity": 0,
+    "resume_text": "Associate PM working on product strategy and go-to-market planning. Looking for a mentor to develop stakeholder management and executive communication skills."
+  },
+  {
+    "name": "Tom Nguyen",
+    "title": "Junior designer",
+    "department": "Design",
+    "seniority": "junior",
+    "role_pool": "mentee",
+    "mentor_capacity": 0,
+    "resume_text": "Junior designer working on design systems and cross-functional product collaboration. Looking for a mentor to help with career growth and leadership development."
+  },
+  {
+    "name": "Amara Obi",
+    "title": "Engineering manager",
+    "department": "Engineering",
+    "seniority": "staff+",
+    "role_pool": "both",
+    "mentor_capacity": 3,
+    "resume_text": "Engineering manager overseeing backend and platform teams. Mentors engineers on distributed systems and system design. Also seeking a mentor with experience in org-wide leadership and executive communication."
+  },
+  {
+    "name": "Wei Zhang",
+    "title": "Product designer",
+    "department": "Design",
+    "seniority": "mid",
+    "role_pool": "mentee",
+    "mentor_capacity": 0,
+    "resume_text": "Product designer with 2 years of experience in design systems. Looking for a mentor in leadership growth and career development within design."
+  },
+  {
+    "name": "Elena Petrova",
+    "title": "VP of engineering",
+    "department": "Engineering",
+    "seniority": "staff+",
+    "role_pool": "mentor",
+    "mentor_capacity": 5,
+    "resume_text": "VP of engineering with expertise in organizational leadership, executive communication, and scaling platform infrastructure teams. Mentors senior engineers and managers on leadership growth."
+  },
+  {
+    "name": "Marcus Bell",
+    "title": "Product manager",
+    "department": "Product",
+    "seniority": "mid",
+    "role_pool": "mentee",
+    "mentor_capacity": 0,
+    "resume_text": "Product manager with 3 years across product strategy and roadmap planning. Looking for a mentor in stakeholder management and go-to-market execution."
+  },
+  {
+    "name": "Hana Suzuki",
+    "title": "Senior software engineer",
+    "department": "Engineering",
+    "seniority": "senior",
+    "role_pool": "both",
+    "mentor_capacity": 2,
+    "resume_text": "Senior software engineer specializing in system design and distributed systems reliability. Open to mentoring engineers on platform infrastructure, and also seeking a mentor for growth into a staff engineer role."
+  },
+  {
+    "name": "Noah Fischer",
+    "title": "Junior product manager",
+    "department": "Product",
+    "seniority": "junior",
+    "role_pool": "mentee",
+    "mentor_capacity": 0,
+    "resume_text": "Junior PM building skills in product strategy and stakeholder management. Looking for a mentor with experience in roadmap planning and go-to-market strategy."
+  }
+]

@@ -5,3 +5,4 @@ numpy
 pdfplumber
 python-docx
 python-multipart
+pytesseract

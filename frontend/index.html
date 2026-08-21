@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mentor Matching — Run a Batch</title>
+<style>
+  :root {
+    --bg: #faf9f7;
+    --surface: #ffffff;
+    --border: #e2e0db;
+    --text: #211f1c;
+    --text-secondary: #6b6862;
+    --accent: #b45309;
+    --accent-bg: #fef3e2;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    margin: 0;
+    padding: 2.5rem 1.5rem;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  h1 { font-size: 1.5rem; font-weight: 600; margin: 0 0 0.25rem; }
+  .subtitle { color: var(--text-secondary); font-size: 0.9rem; margin: 0 0 2rem; }
+
+  .buckets { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+  @media (max-width: 720px) { .buckets { grid-template-columns: 1fr; } }
+
+  .bucket {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem;
+  }
+  .bucket label.title { display: block; font-weight: 600; font-size: 0.92rem; margin-bottom: 4px; }
+  .bucket .hint { color: var(--text-secondary); font-size: 0.78rem; margin-bottom: 10px; }
+  .bucket input[type=file] { width: 100%; font-size: 0.82rem; }
+  .file-count { font-size: 0.78rem; color: var(--accent); margin-top: 6px; min-height: 1em; }
+
+  .controls {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+  .field-group { display: flex; align-items: center; gap: 8px; }
+  .field-group label { font-size: 0.88rem; font-weight: 500; }
+  .field-group input[type=number] {
+    width: 70px; padding: 6px 8px; border: 1px solid var(--border);
+    border-radius: 6px; font-size: 0.9rem;
+  }
+  .field-group input[type=checkbox] { width: 16px; height: 16px; }
+
+  button#runBtn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-left: auto;
+  }
+  button#runBtn:hover { opacity: 0.92; }
+  button#runBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  #status {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    min-height: 1.2em;
+    white-space: pre-line;
+  }
+  #status.error { color: #b91c1c; }
+
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: var(--radius); overflow: hidden; border: 1px solid var(--border); }
+  thead th {
+    text-align: left; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--text-secondary); padding: 10px 12px; border-bottom: 1px solid var(--border);
+    background: #f5f4f1;
+  }
+  tbody td { padding: 10px 12px; font-size: 0.88rem; border-bottom: 1px solid var(--border); }
+  tbody tr:last-child td { border-bottom: none; }
+  .score-pill {
+    display: inline-block; padding: 2px 10px; border-radius: 999px;
+    background: var(--accent-bg); color: var(--accent); font-weight: 600; font-size: 0.82rem;
+  }
+  .id-tag { color: var(--text-secondary); font-size: 0.78rem; }
+  .email { color: var(--text-secondary); font-size: 0.82rem; }
+  .empty-state { color: var(--text-secondary); font-size: 0.88rem; padding: 1rem; text-align: center; }
+  .mentor-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+  .mentor-summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  list-style: none;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+  .mentor-summary::-webkit-details-marker { display: none; }
+  .mentor-summary::before {
+  content: "▸";
+  color: var(--text-secondary);
+  transition: transform 0.15s ease;
+  font-size: 0.8rem;
+}
+  details[open] .mentor-summary::before { transform: rotate(90deg); }
+  .mentor-summary .mentor-email { font-weight: 400; color: var(--text-secondary); font-size: 0.82rem; }
+  .match-count-badge {
+  margin-left: auto;
+  background: var(--accent-bg);
+  color: var(--accent);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 999px;
+  }
+  .mentee-table { width: 100%; border-collapse: collapse; border-top: 1px solid var(--border); }
+  .mentee-table td { padding: 9px 16px; font-size: 0.86rem; border-bottom: 1px solid var(--border); }
+  .mentee-table tr:last-child td { border-bottom: none; }
+  .mentee-table .mentee-name-cell { width: 55%; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Mentor Matching — Run a Batch</h1>
+  <p class="subtitle">Upload resumes into each pool, set mentor capacity, and run matching.</p>
+
+  <div class="buckets">
+    <div class="bucket">
+      <label class="title">Mentor resumes</label>
+      <div class="hint">People offering to mentor</div>
+      <input type="file" id="mentorFiles" multiple accept=".pdf,.docx,.txt">
+      <div class="file-count" id="mentorCount"></div>
+    </div>
+    <div class="bucket">
+      <label class="title">Mentee resumes</label>
+      <div class="hint">People looking for a mentor</div>
+      <input type="file" id="menteeFiles" multiple accept=".pdf,.docx,.txt">
+      <div class="file-count" id="menteeCount"></div>
+    </div>
+    <div class="bucket">
+      <label class="title">Open to both</label>
+      <div class="hint">Could mentor or be mentored</div>
+      <input type="file" id="bothFiles" multiple accept=".pdf,.docx,.txt">
+      <div class="file-count" id="bothCount"></div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="field-group">
+      <label for="capacity">Mentees per mentor</label>
+      <input type="number" id="capacity" value="5" min="1" max="20">
+    </div>
+    <div class="field-group">
+      <input type="checkbox" id="resetFirst" checked>
+      <label for="resetFirst">Clear previous batch first</label>
+    </div>
+    <button id="runBtn">Run matching</button>
+  </div>
+
+  <div id="status"></div>
+
+  <div id="resultsWrap"></div>
+</div>
+
+<script>
+const API = ""; // same origin
+
+const els = {
+  mentor: document.getElementById("mentorFiles"),
+  mentee: document.getElementById("menteeFiles"),
+  both: document.getElementById("bothFiles"),
+  mentorCount: document.getElementById("mentorCount"),
+  menteeCount: document.getElementById("menteeCount"),
+  bothCount: document.getElementById("bothCount"),
+  capacity: document.getElementById("capacity"),
+  resetFirst: document.getElementById("resetFirst"),
+  runBtn: document.getElementById("runBtn"),
+  status: document.getElementById("status"),
+  resultsWrap: document.getElementById("resultsWrap"),
+};
+
+function wireCount(input, label, noun) {
+  input.addEventListener("change", () => {
+    label.textContent = input.files.length
+      ? `${input.files.length} ${noun} selected`
+      : "";
+  });
+}
+wireCount(els.mentor, els.mentorCount, "mentor resume(s)");
+wireCount(els.mentee, els.menteeCount, "mentee resume(s)");
+wireCount(els.both, els.bothCount, "resume(s)");
+
+function setStatus(msg, isError = false) {
+  els.status.textContent = msg;
+  els.status.className = isError ? "error" : "";
+}
+
+async function uploadBucket(pool, fileList) {
+  if (!fileList.length) return { pool, ingested: 0, total: 0 };
+  const form = new FormData();
+  form.append("pool", pool);
+  for (const f of fileList) form.append("files", f);
+  const res = await fetch(`${API}/api/bulk-upload-resumes`, { method: "POST", body: form });
+  if (!res.ok) throw new Error(`Upload failed for ${pool} pool (${res.status})`);
+  return res.json();
+}
+
+function renderResults(rows) {
+  if (!rows.length) {
+    els.resultsWrap.innerHTML = `<div class="empty-state">No confirmed matches yet. Upload resumes into at least one mentor-eligible and one mentee-eligible bucket, then run matching.</div>`;
+    return;
+  }
+
+  // group by mentor
+  const groups = new Map();
+  for (const r of rows) {
+    if (!groups.has(r.mentor_id)) {
+      groups.set(r.mentor_id, {
+        mentor_name: r.mentor_name,
+        mentor_email: r.mentor_email,
+        mentees: [],
+      });
+    }
+    groups.get(r.mentor_id).mentees.push(r);
+  }
+
+  // sort each mentor's mentee list by score, and sort mentors by their top score
+  const groupList = Array.from(groups.values());
+  for (const g of groupList) {
+    g.mentees.sort((a, b) => b.match_score_pct - a.match_score_pct);
+  }
+  groupList.sort((a, b) => b.mentees[0].match_score_pct - a.mentees[0].match_score_pct);
+
+  els.resultsWrap.innerHTML = groupList.map(g => `
+    <details class="mentor-group">
+      <summary class="mentor-summary">
+        ${escapeHtml(g.mentor_name)}
+        <span class="mentor-email">${escapeHtml(g.mentor_email || "no email found")}</span>
+        <span class="match-count-badge">${g.mentees.length} match${g.mentees.length > 1 ? "es" : ""}</span>
+      </summary>
+      <table class="mentee-table">
+        <tbody>
+          ${g.mentees.map(m => `
+            <tr>
+              <td><span class="score-pill">${m.match_score_pct}%</span></td>
+              <td class="mentee-name-cell">${escapeHtml(m.mentee_name)}<br><span class="email">${escapeHtml(m.mentee_email || "no email found")}</span></td>
+              <td>${escapeHtml(m.rationale)}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    </details>
+  `).join("");
+}
+
+function escapeHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str ?? "";
+  return div.innerHTML;
+}
+
+els.runBtn.addEventListener("click", async () => {
+  els.runBtn.disabled = true;
+  els.resultsWrap.innerHTML = "";
+  try {
+    if (els.resetFirst.checked) {
+      setStatus("Clearing previous batch...");
+      const res = await fetch(`${API}/api/reset-all`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to clear previous batch");
+    }
+
+    setStatus("Uploading resumes...");
+    const [mentorRes, menteeRes, bothRes] = await Promise.all([
+      uploadBucket("mentor", els.mentor.files),
+      uploadBucket("mentee", els.mentee.files),
+      uploadBucket("both", els.both.files),
+    ]);
+    const totalIngested = mentorRes.ingested + menteeRes.ingested + bothRes.ingested;
+    if (totalIngested === 0) {
+      setStatus("No resumes were uploaded. Select files in at least one bucket.", true);
+      els.runBtn.disabled = false;
+      return;
+    }
+
+    setStatus(`Ingested ${totalIngested} resumes. Generating shortlists...`);
+    let res = await fetch(`${API}/api/rebuild-matches`, { method: "POST" });
+    if (!res.ok) throw new Error("Failed to generate shortlists");
+
+    const capacity = parseInt(els.capacity.value, 10) || 5;
+    setStatus(`Assigning matches (capacity: ${capacity} mentees per mentor)...`);
+    res = await fetch(`${API}/api/confirm-assignments?capacity=${capacity}`, { method: "POST" });
+    if (!res.ok) throw new Error("Failed to confirm assignments");
+    const confirmInfo = await res.json();
+
+    setStatus("Loading results...");
+    res = await fetch(`${API}/api/all-results?confirmed_only=true`);
+    if (!res.ok) throw new Error("Failed to load results");
+    const rows = await res.json();
+
+    setStatus(`Done. ${confirmInfo.confirmed} of ${confirmInfo.total_candidate_pairs} candidate pairs confirmed as matches.`);
+    renderResults(rows);
+  } catch (err) {
+    setStatus(err.message || "Something went wrong", true);
+  } finally {
+    els.runBtn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

@@ -25,6 +25,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS people (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
+            email TEXT,
             title TEXT,
             department TEXT,
             seniority TEXT,                 -- junior / mid / senior / staff+

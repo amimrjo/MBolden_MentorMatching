@@ -9,6 +9,7 @@ form -- resumes are too unstructured to reliably extract those fields from
 text alone without an LLM step, which isn't in scope here).
 """
 from pathlib import Path
+import re
 
 import pdfplumber
 from docx import Document
@@ -16,6 +17,16 @@ from docx import Document
 
 class UnsupportedFileType(Exception):
     pass
+
+
+def guess_email(text: str) -> str:
+    """
+    Emails are one of the few fields that's actually safe to regex out of a
+    resume reliably -- unlike name/title/role, the format is unambiguous.
+    Returns the first match, or '' if none found.
+    """
+    match = re.search(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}", text)
+    return match.group(0) if match else ""
 
 
 def guess_name_and_title(text: str) -> tuple[str, str]:
@@ -65,9 +76,18 @@ def _extract_pdf(path: Path) -> str:
     with pdfplumber.open(path) as pdf:
         for page in pdf.pages:
             text = page.extract_text()
+            if not text:
+                # no text layer -- likely a scanned/rasterized page, fall back to OCR
+                text = _ocr_page(page)
             if text:
                 chunks.append(text)
     return _clean("\n".join(chunks))
+
+
+def _ocr_page(page) -> str:
+    import pytesseract
+    image = page.to_image(resolution=150).original
+    return pytesseract.image_to_string(image)
 
 
 def _extract_docx(path: Path) -> str:

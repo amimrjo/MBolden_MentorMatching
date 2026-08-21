@@ -8,6 +8,7 @@ from pathlib import Path
 
 from app.database import get_conn, init_db, save_embedding
 from app.embeddings import embed_batch
+from app.resume_parser import guess_email
 
 SAMPLE_PATH = Path(__file__).parent / "sample_data" / "resumes.json"
 
@@ -26,11 +27,11 @@ def seed():
 
     for person, vector in zip(people, vectors):
         cur = conn.execute(
-            """INSERT INTO people (name, title, department, seniority, role_pool, resume_text, mentor_capacity)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            """INSERT INTO people (name, email, title, department, seniority, role_pool, resume_text, mentor_capacity)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                person["name"], person["title"], person["department"], person["seniority"],
-                person["role_pool"], person["resume_text"], person["mentor_capacity"],
+                person["name"], guess_email(person["resume_text"]), person["title"], person["department"],
+                person["seniority"], person["role_pool"], person["resume_text"], person["mentor_capacity"],
             ),
         )
         save_embedding(conn, cur.lastrowid, vector)

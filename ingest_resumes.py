@@ -17,7 +17,7 @@ from pathlib import Path
 
 from app.database import get_conn, init_db, save_embedding
 from app.embeddings import embed_batch
-from app.resume_parser import UnsupportedFileType, extract_text, guess_name_and_title
+from app.resume_parser import UnsupportedFileType, extract_text, guess_email, guess_name_and_title
 
 SUPPORTED = {".pdf", ".docx", ".txt"}
 
@@ -40,9 +40,11 @@ def collect_folder(folder: Path, pool: str, default_mentor_capacity: int):
             continue
 
         name, title = guess_name_and_title(text)
+        email = guess_email(text)
         capacity = default_mentor_capacity if pool in ("mentor", "both") else 0
         rows.append({
             "name": name or file_path.stem,
+            "email": email,
             "title": title,
             "department": "",
             "seniority": "",
@@ -50,7 +52,7 @@ def collect_folder(folder: Path, pool: str, default_mentor_capacity: int):
             "mentor_capacity": capacity,
             "resume_text": text,
         })
-        print(f"  parsed {file_path.name} -> name guess: '{name}' | title guess: '{title}'")
+        print(f"  parsed {file_path.name} -> name guess: '{name}' | title guess: '{title}' | email: '{email}'")
     return rows
 
 
@@ -76,10 +78,10 @@ def ingest(mentor_dir, mentee_dir, both_dir, default_mentor_capacity=5, reset=Tr
 
     for person, vector in zip(people, vectors):
         cur = conn.execute(
-            """INSERT INTO people (name, title, department, seniority, role_pool, resume_text, mentor_capacity)
-               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            """INSERT INTO people (name, email, title, department, seniority, role_pool, resume_text, mentor_capacity)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
             (
-                person["name"], person["title"], person["department"], person["seniority"],
+                person["name"], person["email"], person["title"], person["department"], person["seniority"],
                 person["role_pool"], person["resume_text"], person["mentor_capacity"],
             ),
         )

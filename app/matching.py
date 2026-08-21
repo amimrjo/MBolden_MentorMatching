@@ -38,7 +38,11 @@ def _mentee_pool(conn):
     ).fetchall()
 
 
+EMAIL_PATTERN = re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}")
+
+
 def _keywords(text: str) -> set[str]:
+    text = EMAIL_PATTERN.sub(" ", text)
     words = re.findall(r"[a-zA-Z][a-zA-Z\-]{2,}", text.lower())
     return {w for w in words if w not in STOPWORDS}
 
@@ -54,17 +58,19 @@ def generate_rationale(mentee_row, mentor_row) -> str:
     # prefer longer, more specific terms over generic ones
     shared = sorted(shared, key=len, reverse=True)[:3]
 
-    if mentee_row["department"] == mentor_row["department"]:
+    if mentee_row["department"] and mentee_row["department"] == mentor_row["department"]:
         dept_clause = f"same {mentee_row['department']} background"
-    else:
+    elif mentee_row["department"] and mentor_row["department"]:
         dept_clause = f"cross-department fit ({mentor_row['department']} -> {mentee_row['department']})"
+    else:
+        dept_clause = None
 
     if shared:
         skills_clause = "shared focus on " + ", ".join(shared)
     else:
         skills_clause = "complementary experience profile"
 
-    return f"{skills_clause}; {dept_clause}."
+    return f"{skills_clause}." if dept_clause is None else f"{skills_clause}; {dept_clause}."
 
 
 def generate_shortlists(top_k: int = SHORTLIST_SIZE):
@@ -104,13 +110,18 @@ def generate_shortlists(top_k: int = SHORTLIST_SIZE):
     conn.close()
 
 
-def confirm_assignments():
+def confirm_assignments(capacity_override: int | None = None):
     """
     Capacity-aware greedy assignment: walk all (mentee, mentor) shortlist
     pairs in descending score order, lock in a match if the mentee doesn't
-    have one yet and the mentor is under mentor_capacity (3-5 mentees).
-    This is what runs when matches move from "suggested" to "confirmed" --
-    e.g. after a mentee clicks Request match, or on a scheduled batch run.
+    have one yet and the mentor is under capacity. This is what runs when
+    matches move from "suggested" to "confirmed" -- e.g. after a mentee
+    clicks Request match, or on a scheduled batch run.
+
+    capacity_override: if given, applies this capacity to every mentor for
+    this run instead of each mentor's stored mentor_capacity -- this is what
+    the "how many mentees can one mentor have" field on the matching page
+    controls, rather than requiring capacity to be set per-person at ingest.
     """
     conn = get_conn()
     pairs = conn.execute(
@@ -124,9 +135,10 @@ def confirm_assignments():
     confirmed_ids = []
 
     for pair in pairs:
+        capacity = capacity_override if capacity_override is not None else pair["capacity"]
         if pair["mentee_id"] in mentee_assigned:
             continue
-        if mentor_load[pair["mentor_id"]] >= pair["capacity"]:
+        if mentor_load[pair["mentor_id"]] >= capacity:
             continue
         mentor_load[pair["mentor_id"]] += 1
         mentee_assigned.add(pair["mentee_id"])
